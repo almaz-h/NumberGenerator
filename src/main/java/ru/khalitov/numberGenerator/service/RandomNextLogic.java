@@ -1,6 +1,7 @@
 package ru.khalitov.numberGenerator.service;
 
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,25 +11,39 @@ import java.util.Random;
  */
 @Component
 public class RandomNextLogic {
-    /** @param region, константа, добавляется к случайному номеру
+    /**
+     * @param region, константа, добавляется к случайному номеру
      * @param randomNumberObject, лист , сохраняем сгенерированный номер
      * @param myNumberRandom, это случайный номер выводимый на клиента в контроллере, с регионом
+     * @param myNumberNext, это следующий номер с регионом
      */
     private final String REGION = " 116 RUS";
-    List<String> randomNumberObject = new ArrayList<>();
-    String myNumberRandom = getRandomNumber();
+    List<String> numberObjects = new ArrayList<>();
+    private String myNumberRandom = createRandomNumber();
+    private String myNumberNext = createNextNumber(numberObjects.get(numberObjects.size() - 1));
+
+    public List<String> getNumberObjects() {
+        return numberObjects;
+    }
 
     public String getMyNumberRandom() {
         return myNumberRandom;
     }
 
+    public String getMyNumberNext() {
+        return myNumberNext;
+    }
+
     public RandomNextLogic() {
     }
-    /**метод создает и возвращает клиенту случайно сгенерированный номер состаящий из 6 символов,
+
+    /**
+     * метод создает и возвращает клиенту случайно сгенерированный номер состаящий из 6 символов,
      * 2,3,4 символ - это цифра, 1,5,6 - это буква, к каждому номеру добавляется регион
+     *
      * @return строка с готовым автомобильным номером для представления клиенту
      */
-    public String getRandomNumber() {
+    public String createRandomNumber() {
         String resultMyNumber;
         String randomCharResult;
         String numberSymbol = "AETOPHYKXCBM";
@@ -45,8 +60,8 @@ public class RandomNextLogic {
             выбираем случайный в каждом цикле сохраняем только во 1ую,5ую и 6ую ячейку,
             согласно стандартну присвоения автомобильным номерам
             */
-            randLine = numberSymbol.charAt(random.nextInt(11)+1);
-            switch (i){
+            randLine = numberSymbol.charAt(random.nextInt(11) + 1);
+            switch (i) {
                 case 0:
                 case 4:
                 case 5:
@@ -55,7 +70,7 @@ public class RandomNextLogic {
                 case 1:
                 case 2:
                 case 3:
-                    myNumb[i] = (char)(48+rand);
+                    myNumb[i] = (char) (48 + rand);
                     break;
             }
         }
@@ -63,22 +78,80 @@ public class RandomNextLogic {
          в строку "randomCharResult"
          */
         randomCharResult = String.valueOf(myNumb);
+        resultMyNumber = randomCharResult + REGION;
         /*повторяющихся номеров не должно быть, для этого каждый сгенерированный клиентом номер,
-        сохраняется в массив "randomNumberObject", проверяем , есть ли такой номер, если да,
+        сохраняется в массив "numberObject", проверяем , есть ли такой номер, если да,
         запускаем генерацию заного, если нет сохраняем
          */
-        if (!randomNumberObject.isEmpty()) {
-            for (int j = 0; j < randomNumberObject.size(); j++) {
-                if (randomNumberObject.get(j).equals(randomCharResult)) {
-                    getRandomNumber();
+        if (!numberObjects.isEmpty()) {
+            for (int j = 0; j < numberObjects.size(); j++) {
+                if (numberObjects.get(j).equals(resultMyNumber)) {
+                    createRandomNumber();
                 }
             }
-            randomNumberObject.add(randomCharResult);
-        }else randomNumberObject.add(randomCharResult);
-        resultMyNumber = randomCharResult+REGION;
+            numberObjects.add(resultMyNumber);
+        } else numberObjects.add(resultMyNumber);
         /* возвращаем клиенту готовый номер с регионом
          */
         return resultMyNumber;
     }
 
+    /**
+     * метод генерации следующего за случайным номером по принципу , если клиенту сгенерирован номер
+     * Х287ЕМ, то следующий Х288ЕМ
+     *
+     * @param myNumberRandom передаем в метод случайный номер, для преобразования
+     * @return возвращаем строку, следующий номер
+     */
+    public String createNextNumber(String myNumberRandom) {
+        String resultFollowForRanNumRegion;
+        char[] numberRandomArray = myNumberRandom.toCharArray();
+        int elem2;
+        int elem3;
+        int elem4;
+        for (int i = 0; true; ) {
+            elem2 = numberRandomArray[1] - 48;
+            elem3 = numberRandomArray[2] - 48;
+            elem4 = numberRandomArray[3] - 48;
+            /* elem4 - это четвертый элемент в нашем массиве, если он меньше 9, можно уеличить на единицу,
+            и сохранить новое число как элемент массива
+            */
+            if (elem4 < 9) {
+                ++elem4;
+                numberRandomArray[3] = (char) (48 + elem4);
+                break;
+                /* если elem4 равен 9, и одновременно предыдущий элемент массива
+                 elem3 - это третий элемент массива, не равен 9, присваиваем четвертому элементу 0, а elem3
+            увеличиваем на единицу и так далее
+            */
+            } else if (elem4 == 9 & elem3 < 9) {
+                elem4 = 0;
+                numberRandomArray[3] = (char) (48 + elem4);
+                ++elem3;
+                numberRandomArray[2] = (char) (48 + elem3);
+                break;
+            } else if (elem4 == 9 & elem3 == 9) {
+                elem4 = 0;
+                numberRandomArray[3] = (char) (48 + elem4);
+                elem3 = 0;
+                numberRandomArray[2] = (char) (48 + elem3);
+                ++elem2;
+                numberRandomArray[1] = (char) (48 + elem2);
+                break;
+            }
+        }
+        /* проверяем нашу коллецию, если значение уже присутствует, значит кончились возможные вариации генерации
+         последовательных чисел, вызываем метод рандомной генерации чисел
+         */
+        resultFollowForRanNumRegion = String.valueOf(numberRandomArray);
+        if (!numberObjects.isEmpty()) {
+            for (int j = 0; j < numberObjects.size(); j++) {
+                if (numberObjects.get(j).equals(resultFollowForRanNumRegion)) {
+                    createRandomNumber();
+                }
+            }
+            numberObjects.add(resultFollowForRanNumRegion);
+        }
+        return resultFollowForRanNumRegion;
+    }
 }
