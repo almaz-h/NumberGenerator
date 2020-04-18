@@ -12,8 +12,8 @@ import java.util.Random;
 @Component
 public class RandomNextLogic {
     /**
-     * @param region, константа, добавляется к случайному номеру
-     * @param randomNumberObject, лист , сохраняем сгенерированный номер
+     * @param REGION, константа, добавляется к случайному номеру
+     * @param numberObject, лист , сохраняем сгенерированный номер
      * @param myNumberRandom, это случайный номер выводимый на клиента в контроллере, с регионом
      * @param myNumberNext, это следующий номер с регионом
      */
