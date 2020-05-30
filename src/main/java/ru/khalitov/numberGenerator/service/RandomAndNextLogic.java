@@ -4,21 +4,22 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by almaz-h on 11.04.2020.
  */
 @Component
-public class RandomNextLogic {
+public class RandomAndNextLogic {
     /**
      * @param REGION, константа, добавляется к случайному номеру
      * @param numberObject, лист , сохраняем сгенерированный номер
      * @param myNumberRandom, это случайный номер выводимый на клиента в контроллере, с регионом
      * @param myNumberNext, это следующий номер с регионом
+     * @param numberSymbol, возможные символы в номере
      */
     private final String REGION = " 116 RUS";
-    List<String> numberObjects = new ArrayList<>();
+    private final String numberSymbol = "AETOPHYKXCBM";
+    private List<String> numberObjects = new ArrayList<>();
     private String myNumberRandom = createRandomNumber();
     private String myNumberNext = createNextNumber(numberObjects.get(numberObjects.size() - 1));
 
@@ -34,7 +35,7 @@ public class RandomNextLogic {
         return myNumberNext;
     }
 
-    public RandomNextLogic() {
+    public RandomAndNextLogic() {
     }
 
     /**
@@ -46,21 +47,19 @@ public class RandomNextLogic {
     public String createRandomNumber() {
         String resultMyNumber;
         String randomCharResult;
-        String numberSymbol = "AETOPHYKXCBM";
         char[] myNumb = new char[6];
         int rand;
         char randLine;
-        Random random = new Random();
         for (int i = 0; i < myNumb.length; i++) {
             /*rand - это случайное число от 1 до 9ти в каждом цикле, сохраняем только во 2ую,3ью и 4ую ячейку,
             согласно стандартну присвоения автомобильным номерам
             */
-            rand = random.nextInt(9) + 1;
+            rand = (int) (Math.random() * 9) + 1;
             /*randLine - это случайный символ из строки numberSymbol, элементов 12,
             выбираем случайный в каждом цикле сохраняем только во 1ую,5ую и 6ую ячейку,
             согласно стандартну присвоения автомобильным номерам
             */
-            randLine = numberSymbol.charAt(random.nextInt(11) + 1);
+            randLine = numberSymbol.charAt((int) (Math.random() * 11) + 1);
             switch (i) {
                 case 0:
                 case 4:
@@ -84,13 +83,13 @@ public class RandomNextLogic {
         запускаем генерацию заного, если нет сохраняем
          */
         if (!numberObjects.isEmpty()) {
-            for (int j = 0; j < numberObjects.size(); j++) {
-                if (numberObjects.get(j).equals(resultMyNumber)) {
+            for (String numberObject : numberObjects) {
+                if (numberObject.equals(resultMyNumber)) {
                     createRandomNumber();
                 }
             }
-            numberObjects.add(resultMyNumber);
-        } else numberObjects.add(resultMyNumber);
+        }
+        numberObjects.add(resultMyNumber);
         /* возвращаем клиенту готовый номер с регионом
          */
         return resultMyNumber;
@@ -121,7 +120,7 @@ public class RandomNextLogic {
                 numberRandomArray[3] = (char) (48 + elem4);
                 break;
                 /* если elem4 равен 9, и одновременно предыдущий элемент массива
-                 elem3 - это третий элемент массива, не равен 9, присваиваем четвертому элементу 0, а elem3
+                 elem3 не равен 9, присваиваем четвертому элементу 0, а elem3
             увеличиваем на единицу и так далее
             */
             } else if (elem4 == 9 & elem3 < 9) {
@@ -135,7 +134,11 @@ public class RandomNextLogic {
                 numberRandomArray[3] = (char) (48 + elem4);
                 elem3 = 0;
                 numberRandomArray[2] = (char) (48 + elem3);
-                ++elem2;
+                if (elem2 < 9) {
+                    ++elem2;
+                } else {
+                    elem2 = 0;
+                }
                 numberRandomArray[1] = (char) (48 + elem2);
                 break;
             }
@@ -145,13 +148,13 @@ public class RandomNextLogic {
          */
         resultFollowForRanNumRegion = String.valueOf(numberRandomArray);
         if (!numberObjects.isEmpty()) {
-            for (int j = 0; j < numberObjects.size(); j++) {
-                if (numberObjects.get(j).equals(resultFollowForRanNumRegion)) {
+            for (String numberObject : numberObjects) {
+                if (numberObject.equals(resultFollowForRanNumRegion)) {
                     createRandomNumber();
                 }
             }
-            numberObjects.add(resultFollowForRanNumRegion);
         }
+        numberObjects.add(resultFollowForRanNumRegion);
         return resultFollowForRanNumRegion;
     }
 }
